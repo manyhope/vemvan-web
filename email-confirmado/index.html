@@ -1,0 +1,135 @@
+<!doctype html>
+<!--
+  Página de chegada da confirmação de cadastro.
+
+  Ela não faz nada além de dizer que deu certo, e é justamente esse o ponto: o
+  `/auth/v1/verify` já confirmou o e-mail antes de redirecionar para cá. Antes
+  desta página o destino era `com.prometheus.vemvan://auth`, então quem
+  confirmava no computador via o navegador falhar e concluía que o cadastro
+  tinha quebrado — quando ele havia acabado de ser liberado.
+
+  Não há botão de "abrir o app": um `com.prometheus.vemvan://` aqui falharia no
+  computador exatamente como antes, e no celular o app já teria sido aberto pelo
+  próprio link do e-mail.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>E-mail confirmado · VemVan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    />
+    <style>
+      :root {
+        --canvas: #f5f1e8;
+        --surface: #ffffff;
+        --ink: #101114;
+        --muted: #64676f;
+        --lime: #cfff47;
+        --positive: #2e7d14;
+        --alarm: #c6381a;
+        --sans: "Nunito", "Segoe UI", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        width: 100%;
+        max-width: 460px;
+        background: var(--surface);
+        border-radius: 28px;
+        padding: 36px 30px;
+        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
+          0 12px 32px rgba(16, 17, 20, 0.06);
+      }
+      .mark {
+        display: inline-block;
+        background: var(--lime);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-weight: 900;
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+      h1 {
+        margin: 0 0 10px;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+      p { margin: 0 0 14px; color: var(--muted); }
+      .aviso {
+        margin: 0 0 18px;
+        padding: 13px 15px;
+        border-radius: 16px;
+        border-left: 3px solid var(--positive);
+        background: #eef7e9;
+        color: var(--ink);
+        font-size: 14.5px;
+      }
+      .aviso.ruim { border-left-color: var(--alarm); background: #fdece7; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">VemVan</span>
+
+      <section id="ok" hidden>
+        <h1>E-mail confirmado</h1>
+        <div class="aviso">Sua conta está liberada.</div>
+        <p>Abra o VemVan no celular e entre com o seu e-mail e a sua senha.</p>
+      </section>
+
+      <section id="falhou" hidden>
+        <h1>Este link não vale mais</h1>
+        <div class="aviso ruim" id="motivo">
+          Links de confirmação valem uma vez só e expiram.
+        </div>
+        <p>
+          Se a sua conta ainda não estiver liberada, peça outro e-mail pela tela
+          de entrada do aplicativo.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        var parametros = new URLSearchParams(location.hash.replace(/^#/, ""));
+        var falha = parametros.get("error_description") || parametros.get("error");
+        var deuCerto = !falha;
+
+        if (!deuCerto) {
+          document.getElementById("motivo").textContent =
+            decodeURIComponent(falha).replace(/\+/g, " ");
+        }
+        document.getElementById("ok").hidden = !deuCerto;
+        document.getElementById("falhou").hidden = deuCerto;
+
+        // O fragmento traz a sessão recém-criada. Nada aqui precisa dela, e ela
+        // não deve ficar no histórico do navegador.
+        history.replaceState(null, "", location.pathname + location.search);
+      })();
+    </script>
+  </body>
+</html>

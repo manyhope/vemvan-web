@@ -1,0 +1,302 @@
+<!doctype html>
+<!--
+  Página de redefinição de senha do VemVan.
+
+  Ela existe porque o link do e-mail apontava para `com.prometheus.vemvan://auth`,
+  que é endereço de aplicativo e não de página: no computador o navegador recebia
+  o redirecionamento e não tinha o que fazer com ele. O token era consumido com
+  sucesso (o `/verify` devolve 303) e mesmo assim a pessoa não via nada, clicava
+  de novo e aí sim lia "expirado". Era o pior desenho possível — funcionava e
+  parecia quebrado.
+
+  Hospedar isto dentro do Supabase não é possível, e foi verificado nos dois
+  caminhos em 31/08/2026: Edge Function e Storage devolvem `text/plain` com
+  `nosniff` e `Content-Security-Policy: default-src 'none'; sandbox`. É a trava
+  antiphishing da plataforma, não configuração. Daí o GitHub Pages.
+
+  A `SUPABASE_PUBLISHABLE_KEY` abaixo é pública por definição — é a mesma que vai
+  no APK. Quem autoriza a troca é o `access_token` que chega no fragmento da URL,
+  e ele vale uma vez só.
+
+  O fragmento (`#`) nunca é enviado ao servidor, então o token não aparece em log
+  de acesso do GitHub nem em Referer. Por isso ele é lido no navegador e apagado
+  da barra de endereço assim que a página o consome.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Redefinir sua senha · VemVan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    />
+    <style>
+      :root {
+        --canvas: #f5f1e8;
+        --surface: #ffffff;
+        --ink: #101114;
+        --muted: #64676f;
+        --hairline: #e5e1d8;
+        --primary: #1857ff;
+        --lime: #cfff47;
+        --alarm: #c6381a;
+        --positive: #2e7d14;
+        --sans: "Nunito", "Segoe UI", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        width: 100%;
+        max-width: 460px;
+        background: var(--surface);
+        border-radius: 28px;
+        padding: 36px 30px;
+        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
+          0 12px 32px rgba(16, 17, 20, 0.06);
+      }
+
+      .mark {
+        display: inline-block;
+        background: var(--lime);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-weight: 900;
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+
+      p { margin: 0 0 20px; color: var(--muted); }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input[type="password"] {
+        width: 100%;
+        font-family: var(--sans);
+        font-size: 16px;
+        padding: 15px 16px;
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        background: var(--surface);
+        color: var(--ink);
+        margin-bottom: 16px;
+      }
+      input[type="password"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(24, 87, 255, 0.15);
+      }
+
+      button {
+        width: 100%;
+        min-height: 54px;
+        font-family: var(--sans);
+        font-size: 16px;
+        font-weight: 800;
+        color: #fff;
+        background: var(--primary);
+        border: 0;
+        border-radius: 16px;
+        cursor: pointer;
+      }
+      button:disabled { opacity: 0.4; cursor: default; }
+      button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+      .aviso {
+        margin: 0 0 18px;
+        padding: 13px 15px;
+        border-radius: 16px;
+        border-left: 3px solid var(--alarm);
+        background: #fdece7;
+        color: var(--ink);
+        font-size: 14.5px;
+      }
+      .aviso.ok { border-left-color: var(--positive); background: #eef7e9; }
+
+      .dica { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">VemVan</span>
+
+      <!-- Estado 1: o link trouxe uma sessão válida. -->
+      <section id="formulario" hidden>
+        <h1>Escolha uma nova senha</h1>
+        <p>Ela precisa ter pelo menos 8 caracteres.</p>
+
+        <div id="erro" class="aviso" hidden></div>
+
+        <form id="troca">
+          <label for="senha">Nova senha</label>
+          <input id="senha" type="password" autocomplete="new-password" minlength="8" required />
+
+          <label for="repetida">Repita a nova senha</label>
+          <input id="repetida" type="password" autocomplete="new-password" minlength="8" required />
+
+          <button id="salvar" type="submit">Salvar nova senha</button>
+        </form>
+      </section>
+
+      <!-- Estado 2: deu certo. -->
+      <section id="pronto" hidden>
+        <h1>Senha alterada</h1>
+        <div class="aviso ok">
+          Pronto. Abra o VemVan no celular e entre com a senha nova.
+        </div>
+        <p class="dica">Pode fechar esta página.</p>
+      </section>
+
+      <!-- Estado 3: o link não serve mais. -->
+      <section id="invalido" hidden>
+        <h1>Este link não vale mais</h1>
+        <p id="motivo">
+          Links de redefinição valem uma vez só e expiram. Peça outro pela tela de
+          entrada do aplicativo, em “Esqueci minha senha”.
+        </p>
+        <p class="dica">
+          Se você já tinha clicado neste link antes, ele foi consumido no primeiro
+          clique — mesmo que nada tenha aparecido na tela.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        var API = "https://ocqzuwjgvejbqkrlafns.supabase.co";
+        var CHAVE = "sb_publishable_illzCJPRChUeV6WeF9jbYw_UHyT-mrx";
+        var MINIMO = 8;
+
+        var formulario = document.getElementById("formulario");
+        var pronto = document.getElementById("pronto");
+        var invalido = document.getElementById("invalido");
+        var motivo = document.getElementById("motivo");
+        var erro = document.getElementById("erro");
+        var salvar = document.getElementById("salvar");
+
+        function mostrar(secao) {
+          [formulario, pronto, invalido].forEach(function (s) {
+            s.hidden = s !== secao;
+          });
+        }
+
+        function reclamar(texto) {
+          erro.textContent = texto;
+          erro.hidden = false;
+        }
+
+        // O Supabase devolve tudo no fragmento: `#access_token=…&type=recovery`
+        // quando deu certo, `#error=…&error_code=…` quando o token já foi usado.
+        var parametros = new URLSearchParams(location.hash.replace(/^#/, ""));
+        var token = parametros.get("access_token");
+        var falha = parametros.get("error_description") || parametros.get("error");
+
+        if (!token) {
+          if (falha) motivo.textContent = decodeURIComponent(falha).replace(/\+/g, " ");
+          mostrar(invalido);
+          return;
+        }
+
+        // Tira o token da barra de endereço assim que ele está em memória: ele
+        // ainda vale, e o histórico do navegador é compartilhado com quem usa a
+        // máquina depois.
+        history.replaceState(null, "", location.pathname + location.search);
+        mostrar(formulario);
+
+        document.getElementById("troca").addEventListener("submit", function (evento) {
+          evento.preventDefault();
+          erro.hidden = true;
+
+          var senha = document.getElementById("senha").value;
+          var repetida = document.getElementById("repetida").value;
+
+          if (senha.length < MINIMO) {
+            reclamar("A senha precisa ter pelo menos " + MINIMO + " caracteres.");
+            return;
+          }
+          if (senha !== repetida) {
+            reclamar("As duas senhas não são iguais.");
+            return;
+          }
+
+          salvar.disabled = true;
+          salvar.textContent = "Salvando…";
+
+          fetch(API + "/auth/v1/user", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: CHAVE,
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({ password: senha }),
+          })
+            .then(function (resposta) {
+              return resposta.json().then(function (corpo) {
+                return { ok: resposta.ok, corpo: corpo };
+              });
+            })
+            .then(function (resultado) {
+              if (resultado.ok) {
+                mostrar(pronto);
+                return;
+              }
+              var texto = (resultado.corpo && (resultado.corpo.msg || resultado.corpo.error_description || resultado.corpo.message)) || "";
+              if (/expired|invalid|not found/i.test(texto)) {
+                mostrar(invalido);
+                return;
+              }
+              if (/different from the old|should be different/i.test(texto)) {
+                reclamar("A nova senha precisa ser diferente da anterior.");
+              } else {
+                reclamar(texto || "Não foi possível salvar. Tente de novo.");
+              }
+              salvar.disabled = false;
+              salvar.textContent = "Salvar nova senha";
+            })
+            .catch(function () {
+              reclamar("Sem conexão com o servidor. Verifique a internet e tente de novo.");
+              salvar.disabled = false;
+              salvar.textContent = "Salvar nova senha";
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>
