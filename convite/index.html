@@ -1,0 +1,268 @@
+<!doctype html>
+<!--
+  Página de chegada do convite, para quem NÃO abriu no celular certo.
+
+  Quem manda para cá é a Edge Function `convite`, e só no ramo em que ela não
+  tem um desvio melhor: computador, e o iPad que se anuncia como Mac. No
+  Android ela responde `intent://`, que abre o app ou vai para a Play Store
+  sozinho; no iPhone ela responde `com.prometheus.vemvan://convite/<CODIGO>`,
+  porque o Safari não sabe tentar um esquema e cair para um plano B — ver o
+  cabeçalho de `supabase/functions/convite/index.ts`.
+
+  Hospedar isto dentro do Supabase não é possível, e foi verificado nos dois
+  caminhos em 31/08/2026: Edge Function e Storage devolvem `text/plain` com
+  `nosniff` e `Content-Security-Policy: default-src 'none'; sandbox`. É a trava
+  antiphishing da plataforma, não configuração. Daí o GitHub Pages.
+
+  **O código chega em `?c=` e é conferido antes de virar link.** Ele entra num
+  `href` de esquema próprio; sem a conferência de formato, qualquer texto na
+  query viraria um endereço que o navegador tentaria abrir. O mesmo formato do
+  banco e dos dois apps: doze caracteres, A-Z e 0-9.
+
+  **A página não promete App Store**, e é decisão consciente: o app iOS ainda
+  não está publicado. Escrever "em breve" seria pedir para a pessoa esperar por
+  algo sem data, quando existe um caminho que funciona hoje — pegar o app com
+  quem convidou e digitar o código dentro dele. O fonte mora em `web/` neste
+  repositório e é espelhado à mão em `manyhope/vemvan-web`; nada sincroniza
+  sozinho.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Convite do VemVan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    />
+    <style>
+      :root {
+        --canvas: #f5f1e8;
+        --surface: #ffffff;
+        --ink: #101114;
+        --muted: #64676f;
+        --hairline: #e5e1d8;
+        --primary: #1857ff;
+        --lime: #cfff47;
+        --positive: #2e7d14;
+        --alarm: #c6381a;
+        --sans: "Nunito", "Segoe UI", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        width: 100%;
+        max-width: 460px;
+        background: var(--surface);
+        border-radius: 28px;
+        padding: 36px 30px;
+        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
+          0 12px 32px rgba(16, 17, 20, 0.06);
+      }
+
+      .mark {
+        display: inline-block;
+        background: var(--lime);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-weight: 900;
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin: 26px 0 8px;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: -0.005em;
+      }
+
+      p { margin: 0 0 20px; color: var(--muted); }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      /* O código é para ser LIDO e digitado noutro aparelho: monoespaçado,
+         espaçado, e grande o bastante para não confundir O com 0. */
+      .codigo {
+        display: block;
+        width: 100%;
+        font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-align: center;
+        padding: 15px 12px;
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        word-break: break-all;
+      }
+
+      a.botao {
+        display: block;
+        width: 100%;
+        min-height: 54px;
+        line-height: 54px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #fff;
+        background: var(--primary);
+        border-radius: 16px;
+        margin-bottom: 12px;
+      }
+      a.botao.secundario {
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--hairline);
+      }
+      a.botao:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+      .aviso {
+        margin: 0 0 18px;
+        padding: 13px 15px;
+        border-radius: 16px;
+        border-left: 3px solid var(--positive);
+        background: #eef7e9;
+        color: var(--ink);
+        font-size: 14.5px;
+      }
+      .aviso.ruim { border-left-color: var(--alarm); background: #fdece7; }
+
+      .dica { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">VemVan</span>
+
+      <!-- Estado 1: o link trouxe um código com o formato certo. -->
+      <section id="com-codigo" hidden>
+        <h1>Seu convite para acompanhar a van</h1>
+        <div class="aviso">
+          Quem te convidou já cadastrou a criança. Falta você entrar no VemVan
+          com este código.
+        </div>
+
+        <label for="codigo">Código do convite</label>
+        <code class="codigo" id="codigo"></code>
+
+        <a class="botao" id="abrir" href="#">Abrir no app</a>
+        <p class="dica">
+          Se o VemVan já estiver instalado neste aparelho, o botão abre direto
+          na tela do convite.
+        </p>
+
+        <h2>No Android</h2>
+        <p>
+          Sem o app instalado, baixe pela Google Play, abra
+          <strong>Grupo Família</strong>, escolha
+          <strong>Vincular aluno à minha conta</strong> e digite o código acima.
+        </p>
+        <a class="botao secundario" href="https://play.google.com/store/apps/details?id=com.prometheus.vemvan"
+          >Baixar na Google Play</a
+        >
+
+        <h2>No iPhone</h2>
+        <p>
+          O VemVan ainda <strong>não está na App Store</strong>. Quem manda o
+          app é quem te convidou — o condutor ou a operação do transporte —, e
+          eles instalam no seu aparelho. Depois é só abrir o VemVan, ir em
+          <strong>Grupo Família</strong>, escolher
+          <strong>Vincular aluno à minha conta</strong> e digitar o código acima.
+        </p>
+        <p class="dica">
+          Guarde este código: ele vale por 48 horas e serve uma vez só. Passou o
+          prazo, peça outro a quem te convidou.
+        </p>
+      </section>
+
+      <!-- Estado 2: chegou aqui sem código, ou com um código de outro formato. -->
+      <section id="sem-codigo" hidden>
+        <h1>Falta o código do convite</h1>
+        <div class="aviso ruim">
+          Este endereço abriu sem um código de convite válido.
+        </div>
+        <p>
+          O código tem doze caracteres e vem na mensagem que o condutor ou a
+          operação do transporte te mandou. Abra o link daquela mensagem, ou
+          digite o código dentro do app: <strong>Grupo Família</strong> →
+          <strong>Vincular aluno à minha conta</strong>.
+        </p>
+
+        <h2>No Android</h2>
+        <a class="botao secundario" href="https://play.google.com/store/apps/details?id=com.prometheus.vemvan"
+          >Baixar na Google Play</a
+        >
+
+        <h2>No iPhone</h2>
+        <p>
+          O VemVan ainda <strong>não está na App Store</strong>. Peça o app a
+          quem te convidou — o condutor ou a operação do transporte.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        var ESQUEMA = "com.prometheus.vemvan://convite/";
+        // O mesmo formato do banco, dos dois apps e da Edge Function. Ele
+        // existe aqui porque o valor da query vira `href`: sem a conferência,
+        // texto qualquer viraria endereço que o navegador tentaria abrir.
+        var FORMATO = /^[A-Z0-9]{12}$/;
+
+        var bruto = new URLSearchParams(location.search).get("c") || "";
+        var codigo = bruto.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+        var vale = FORMATO.test(codigo);
+
+        if (vale) {
+          // `textContent`, nunca `innerHTML`: o valor veio da barra de
+          // endereço, e ele é texto, não marcação.
+          document.getElementById("codigo").textContent = codigo;
+          document.getElementById("abrir").href = ESQUEMA + codigo;
+        }
+
+        document.getElementById("com-codigo").hidden = !vale;
+        document.getElementById("sem-codigo").hidden = vale;
+      })();
+    </script>
+  </body>
+</html>
