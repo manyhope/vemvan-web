@@ -1,0 +1,254 @@
+<!doctype html>
+<!--
+  Página pública de exclusão de conta.
+
+  Exigência específica da Play Store desde 2024: todo app que deixa criar conta
+  precisa de uma URL, alcançável fora do app e sem login, que explique como
+  apagar a conta e o que acontece com os dados. O campo fica no formulário de
+  Segurança dos dados; sem ele o envio é recusado antes da revisão. A App Store
+  cobra o mesmo caminho, embora aceite que ele viva dentro da política.
+
+  A página não apaga nada e não tem formulário. É deliberado: a exclusão de
+  verdade acontece dentro do app, autenticada, com a confirmação por escrito de
+  `delete-account-screen.tsx`. Um botão aqui teria de aceitar um e-mail digitado
+  por qualquer pessoa e apagar a conta de outra — exatamente o que a tela do app
+  evita.
+
+  **Os prazos abaixo têm de bater com o que o app cumpre**: desativação
+  imediata, eliminação em 30 dias, coordenadas descartadas ao fim da rota. Eles
+  vêm da seção 5 de `mobile/src/features/auth/legal-documents.ts`. Mudar o prazo
+  no servidor sem mudar aqui transforma esta página numa promessa falsa.
+
+  O endereço de suporte é o mesmo de `mobile/src/features/support/support-contact.ts`.
+  Enquanto ele não existir, o bloco fica marcado em amarelo e a página não pode
+  ir ao ar: quem desinstalou o app não teria como pedir a exclusão.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      name="description"
+      content="Como excluir sua conta do VemVan, o que é apagado e em quanto tempo."
+    />
+    <title>Excluir a conta · VemVan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    />
+    <style>
+      :root {
+        --canvas: #f5f1e8;
+        --surface: #ffffff;
+        --ink: #101114;
+        --muted: #64676f;
+        --hairline: #e5e1d8;
+        --primary: #1857ff;
+        --lime: #cfff47;
+        --alarm: #c6381a;
+        --sans: "Nunito", "Segoe UI", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.65;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        width: 100%;
+        max-width: 620px;
+        margin: 0 auto;
+        background: var(--surface);
+        border-radius: 28px;
+        padding: 36px 30px 40px;
+        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
+          0 12px 32px rgba(16, 17, 20, 0.06);
+      }
+      .mark {
+        display: inline-block;
+        background: var(--lime);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-weight: 900;
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+      h2 {
+        margin: 30px 0 8px;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      h3 {
+        margin: 20px 0 6px;
+        font-size: 15.5px;
+        font-weight: 800;
+        color: var(--primary);
+      }
+      p { margin: 0 0 14px; }
+      ol, ul { margin: 0 0 14px; padding-left: 22px; }
+      li { margin-bottom: 8px; }
+      .passos li { font-weight: 600; }
+      .passos li span { font-weight: 400; color: var(--muted); display: block; }
+      .prazo {
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border-left: 3px solid var(--primary);
+        background: #eef2ff;
+        font-size: 14.5px;
+      }
+      mark.falta {
+        background: #fff3bf;
+        border-radius: 5px;
+        padding: 1px 5px;
+        font-weight: 700;
+        color: #6b4e00;
+      }
+      table { width: 100%; border-collapse: collapse; margin: 0 0 16px; }
+      th, td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--hairline);
+        font-size: 14.5px;
+        vertical-align: top;
+      }
+      th { font-weight: 800; }
+      td:last-child { color: var(--muted); }
+      .encerra {
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--hairline);
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      a { color: var(--primary); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">VemVan</span>
+
+      <h1>Excluir a conta do VemVan</h1>
+
+      <p>
+        A exclusão é feita por você mesmo, dentro do aplicativo, e não depende de
+        nos pedir. Ela apaga sua conta e os dados ligados a ela.
+      </p>
+
+      <div class="prazo">
+        A conta é desativada no momento em que você confirma. Os dados são
+        eliminados <strong>30 dias</strong> depois — esse prazo existe para que
+        você possa desistir, cancelando o pedido pelo próprio app.
+      </div>
+
+      <h2>Como pedir</h2>
+      <ol class="passos">
+        <li>
+          Abra o VemVan e entre na sua conta.
+          <span>Se você não lembra a senha, use “Esqueci minha senha” na tela de entrada.</span>
+        </li>
+        <li>
+          Toque em Perfil e depois em Privacidade e segurança.
+        </li>
+        <li>
+          Escolha Excluir minha conta.
+        </li>
+        <li>
+          Escreva a palavra EXCLUIR e confirme.
+          <span>É o passo que evita apagar a conta por toque acidental.</span>
+        </li>
+      </ol>
+
+      <p>
+        Enquanto os 30 dias não passam, a mesma tela mostra o pedido em
+        andamento e permite cancelá-lo. Depois desse prazo não há como recuperar.
+      </p>
+
+      <h2>Se você já desinstalou o aplicativo</h2>
+      <p>
+        Instale o VemVan de novo e siga os passos acima — a conta continua lá até
+        ser apagada. Se não conseguir entrar, escreva para
+        vemvan.app@hotmail.com do endereço de e-mail
+        cadastrado, pedindo a exclusão.
+      </p>
+
+      <h2>O que é apagado</h2>
+      <table>
+        <tr>
+          <th>Seu cadastro</th>
+          <td>Nome, e-mail e telefone.</td>
+        </tr>
+        <tr>
+          <th>Vínculos</th>
+          <td>
+            A ligação da sua conta com os alunos que você acompanha, e os
+            convites que você recebeu ou enviou.
+          </td>
+        </tr>
+        <tr>
+          <th>Avisos</th>
+          <td>Os recados enviados a você e o registro deste aparelho.</td>
+        </tr>
+        <tr>
+          <th>Localização</th>
+          <td>
+            Nada a apagar: a posição da van só existe durante a rota e é
+            descartada ao encerrá-la. O app não guarda histórico de trajeto.
+          </td>
+        </tr>
+      </table>
+
+      <h2>O alcance depende de quem você é no app</h2>
+
+      <h3>Se você acompanha um aluno (família)</h3>
+      <ul>
+        <li>
+          <strong>O cadastro do aluno continua.</strong> Ele pertence ao condutor
+          que o cadastrou e faz parte da rota dele. Sua conta é desligada do
+          aluno, e você deixa de acompanhá-lo e de receber avisos.
+        </li>
+        <li>
+          <strong>A chamada já registrada continua.</strong> Embarques e
+          desembarques de rotas passadas são o histórico da rota, e passam a
+          existir sem o seu nome.
+        </li>
+      </ul>
+
+      <h3>Se você dirige a van (condutor)</h3>
+      <p>
+        Sua exclusão é mais ampla, e vale conferir antes de confirmar: os alunos
+        que <strong>você</strong> cadastrou são apagados junto com a sua conta, e
+        com eles a chamada da sua rota e as mensalidades emitidas. As famílias
+        vinculadas deixam de ver a rota e perdem o histórico daqueles alunos.
+      </p>
+      <p>
+        Se a rota vai continuar com outra pessoa, peça a ela que cadastre os
+        alunos antes de você apagar a sua conta.
+      </p>
+
+      <p class="encerra">
+        Como tratamos seus dados enquanto a conta existe está na
+        <a href="../privacidade/">Política de privacidade</a>.
+      </p>
+    </main>
+  </body>
+</html>

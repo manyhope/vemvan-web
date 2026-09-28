@@ -12,6 +12,9 @@ pessoa clicava de novo e só então lia "expirado".
   senha ali mesmo, em qualquer navegador.
 - **`email-confirmado/`** — só confirma que deu certo; o `/verify` já liberou a
   conta antes de redirecionar para cá.
+- **`privacidade/`** e **`excluir-conta/`** — a política de privacidade e o
+  pedido de exclusão de conta, que a Play Store e a App Store exigem num endereço
+  público. O texto da política é o mesmo do app.
 
 ## Por que um repositório separado
 

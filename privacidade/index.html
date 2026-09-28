@@ -1,0 +1,206 @@
+<!doctype html>
+<!--
+  Política de privacidade pública do VemVan.
+
+  As duas lojas exigem esta página num endereço aberto, alcançável sem instalar
+  o app e sem fazer login — a Play Store pede a URL no formulário de Segurança
+  dos dados, e a App Store no campo Privacy Policy URL. Sem ela o envio nem
+  chega à revisão.
+
+  **O texto abaixo é o mesmo de `mobile/src/features/auth/legal-documents.ts`**,
+  documento `PRIVACY`, e os dois precisam continuar iguais. Divergir é pior do
+  que não ter a página: a loja compara o que o app faz aceitar com o que está
+  publicado aqui. Ao mudar um, mude o outro no mesmo commit.
+
+  Os dados da empresa estão preenchidos desde 28/09/2026. Um campo ainda marcado
+  com `<mark class="falta">…</mark>` é dado que falta: enquanto ele existir, a
+  página não deve ir ao ar.
+
+  Diferente das outras páginas de `web/`, esta NÃO leva `noindex`: ela precisa
+  ser encontrável. O fonte mora aqui e é espelhado à mão em `manyhope/vemvan-web`;
+  nada sincroniza sozinho.
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      name="description"
+      content="Como o VemVan trata os dados de condutores, famílias e alunos do transporte escolar."
+    />
+    <title>Política de privacidade · VemVan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+    />
+    <style>
+      :root {
+        --canvas: #f5f1e8;
+        --surface: #ffffff;
+        --ink: #101114;
+        --muted: #64676f;
+        --hairline: #e5e1d8;
+        --primary: #1857ff;
+        --lime: #cfff47;
+        --alarm: #c6381a;
+        --sans: "Nunito", "Segoe UI", -apple-system, BlinkMacSystemFont,
+          "Helvetica Neue", Arial, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.65;
+        padding: 24px;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        width: 100%;
+        max-width: 680px;
+        margin: 0 auto;
+        background: var(--surface);
+        border-radius: 28px;
+        padding: 36px 30px 40px;
+        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
+          0 12px 32px rgba(16, 17, 20, 0.06);
+      }
+      .mark {
+        display: inline-block;
+        background: var(--lime);
+        color: var(--ink);
+        border-radius: 10px;
+        padding: 7px 13px;
+        font-weight: 900;
+        font-size: 15px;
+        margin-bottom: 22px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+      h2 {
+        margin: 30px 0 8px;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      p { margin: 0 0 14px; }
+      ul { margin: 0 0 14px; padding-left: 22px; }
+      li { margin-bottom: 6px; }
+      .data { color: var(--muted); font-size: 14.5px; margin-bottom: 26px; }
+      mark.falta {
+        background: #fff3bf;
+        border-radius: 5px;
+        padding: 1px 5px;
+        font-weight: 700;
+        color: #6b4e00;
+      }
+      .encerra {
+        margin-top: 32px;
+        padding-top: 20px;
+        border-top: 1px solid var(--hairline);
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      a { color: var(--primary); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">VemVan</span>
+
+      <h1>Política de privacidade</h1>
+      <p class="data">Versão de 28 de setembro de 2026.</p>
+
+      <p>
+        Controlador: JULIO CESAR COSTA E SILVA DESENVOLVIMENTO DE SOFTWARE LTDA
+        (Prometheus Software House), CNPJ 65.270.403/0001-04.<br />
+        Encarregado (DPO): Julio Cesar Costa e Silva,
+        <a href="mailto:contato@prometheusdev.com.br">contato@prometheusdev.com.br</a>.
+      </p>
+
+      <h2>1. Dados que tratamos</h2>
+      <ul>
+        <li>Cadastro: nome, e-mail e telefone do titular.</li>
+        <li>
+          Aluno: nome, endereço de embarque, escola, série e horário, informados
+          pelo condutor responsável pela rota.
+        </li>
+        <li>
+          Operação: chamada da rota (embarque, desembarque, faltas e motivo
+          informado pela família).
+        </li>
+        <li>Localização: posição da van durante a rota em andamento.</li>
+        <li>Uso: registros técnicos necessários ao funcionamento.</li>
+      </ul>
+
+      <h2>2. Localização, em detalhe</h2>
+      <p>
+        A localização é coletada do aparelho do condutor e apenas enquanto ele
+        mantém uma rota ativa, iniciada por gesto explícito. Guardamos somente a
+        última posição da rota em andamento; ela é substituída a cada atualização
+        e apagada ao encerrar a rota. Não mantemos histórico de trajeto. A
+        família vinculada vê essa posição enquanto a rota estiver ativa.
+      </p>
+
+      <h2>3. Base legal</h2>
+      <ul>
+        <li>Execução de contrato, para cadastro e operação da rota.</li>
+        <li>
+          Consentimento específico do responsável, para tratar dados do aluno
+          menor de idade e permitir o acompanhamento da rota (Art. 14 da LGPD).
+        </li>
+        <li>Cumprimento de obrigação legal, quando aplicável.</li>
+      </ul>
+
+      <h2>4. Compartilhamento</h2>
+      <p>
+        Não vendemos dados. Compartilhamos apenas com o condutor responsável pela
+        rota do aluno, com as famílias autorizadas daquele aluno, e com
+        fornecedores de infraestrutura necessários ao funcionamento do app.
+      </p>
+
+      <h2>5. Retenção</h2>
+      <p>
+        Dados de cadastro e operação são mantidos enquanto a conta existir. Pedida
+        a exclusão, a conta é desativada na hora e os dados são eliminados após 30
+        dias, prazo em que o titular pode desistir. Coordenadas não são retidas
+        após o fim da rota.
+      </p>
+
+      <h2>6. Seus direitos (Art. 18)</h2>
+      <p>
+        Confirmação e acesso, correção, portabilidade, eliminação, informação
+        sobre compartilhamento e revogação do consentimento. Acesso, correção,
+        portabilidade e eliminação estão disponíveis dentro do app, em Perfil ›
+        Privacidade e segurança. Para os demais, fale com o encarregado.
+      </p>
+      <p>
+        O caminho para apagar a conta está descrito em
+        <a href="../excluir-conta/">Excluir a conta do VemVan</a>.
+      </p>
+
+      <h2>7. Crianças</h2>
+      <p>
+        O app é usado por adultos. Dados de crianças são tratados no interesse do
+        transporte escolar, mediante consentimento do responsável, que pode ser
+        revogado a qualquer momento desfazendo o vínculo com o aluno.
+      </p>
+
+      <p class="encerra">
+        Dúvidas sobre esta política:
+        vemvan.app@hotmail.com.
+      </p>
+    </main>
+  </body>
+</html>
