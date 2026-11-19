@@ -21,6 +21,11 @@
   O fragmento (`#`) nunca é enviado ao servidor, então o token não aparece em log
   de acesso do GitHub nem em Referer. Por isso ele é lido no navegador e apagado
   da barra de endereço assim que a página o consome.
+
+  Visual: blocos retos de ponta a ponta (painel azul da marca + área de formulário
+  branca), sem cartão flutuando — a mesma direção dos e-mails. O trio azul, verde
+  e vermelho aparece só na rota do painel. A força da senha e a lista de
+  requisitos são só orientação: quem decide se a senha serve é o servidor.
 -->
 <html lang="pt-BR">
   <head>
@@ -43,6 +48,7 @@
         --muted: #64676f;
         --hairline: #e5e1d8;
         --primary: #1857ff;
+        --primary-deep: #0f3fcc;
         --lime: #cfff47;
         --alarm: #c6381a;
         --positive: #2e7d14;
@@ -55,28 +61,41 @@
       body {
         margin: 0;
         min-height: 100vh;
-        background: var(--canvas);
+        min-height: 100dvh;
+        background: var(--surface);
         color: var(--ink);
         font-family: var(--sans);
         font-size: 16px;
         line-height: 1.6;
-        display: grid;
-        place-items: center;
-        padding: 24px;
         -webkit-font-smoothing: antialiased;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
       }
 
-      main {
-        width: 100%;
-        max-width: 460px;
-        background: var(--surface);
-        border-radius: 28px;
-        padding: 36px 30px;
-        box-shadow: 0 1px 2px rgba(16, 17, 20, 0.04),
-          0 12px 32px rgba(16, 17, 20, 0.06);
+      /* ---------- painel da marca ---------- */
+      .marca {
+        position: relative;
+        overflow: hidden;
+        background: var(--primary);
+        color: #fff;
+        padding: 26px 24px 30px;
       }
+      .marca::before {
+        /* um clarão suave no canto, para o azul não ficar chapado */
+        content: "";
+        position: absolute;
+        right: -120px;
+        top: -140px;
+        width: 360px;
+        height: 360px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 70%);
+        pointer-events: none;
+      }
+      .marca > * { position: relative; }
 
-      .mark {
+      .logo {
         display: inline-block;
         background: var(--lime);
         color: var(--ink);
@@ -84,15 +103,56 @@
         padding: 7px 13px;
         font-weight: 900;
         font-size: 15px;
-        margin-bottom: 22px;
+        line-height: 1.3;
       }
 
+      .marca h2 {
+        margin: 26px 0 0;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+      }
+      .marca h2 em { font-style: normal; color: var(--lime); }
+      .marca .frase {
+        display: none;
+        margin: 14px 0 0;
+        max-width: 340px;
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .rota { display: none; width: 100%; height: auto; margin-top: 44px; }
+
+      /* ---------- área do formulário ---------- */
+      .conteudo {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 34px 24px 48px;
+      }
+      .miolo { width: 100%; max-width: 400px; }
+
+      .selo {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 20px;
+        background: #e8eeff;
+        color: var(--primary);
+      }
+      .selo svg { width: 26px; height: 26px; }
+      .selo.ok { background: var(--lime); color: var(--ink); }
+      .selo.ruim { background: #fdece7; color: var(--alarm); }
+
       h1 {
-        margin: 0 0 10px;
-        font-size: 26px;
-        font-weight: 800;
-        letter-spacing: -0.015em;
-        line-height: 1.2;
+        margin: 0 0 8px;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
       }
 
       p { margin: 0 0 20px; color: var(--muted); }
@@ -101,30 +161,106 @@
         display: block;
         font-size: 13px;
         font-weight: 800;
-        color: var(--muted);
+        color: var(--ink);
         margin-bottom: 6px;
       }
 
-      input[type="password"] {
+      .campo { position: relative; margin-bottom: 14px; }
+
+      input[type="password"],
+      input[type="text"] {
         width: 100%;
         font-family: var(--sans);
         font-size: 16px;
-        padding: 15px 16px;
-        border: 1px solid var(--hairline);
+        padding: 15px 52px 15px 16px;
+        border: 1.5px solid var(--hairline);
         border-radius: 16px;
         background: var(--surface);
         color: var(--ink);
-        margin-bottom: 16px;
+        transition: border-color 0.15s, box-shadow 0.15s;
       }
-      input[type="password"]:focus {
+      input:hover { border-color: #cfcabd; }
+      input:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(24, 87, 255, 0.15);
+        box-shadow: 0 0 0 4px rgba(24, 87, 255, 0.14);
       }
 
-      button {
+      .olho {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .olho:hover { background: #f1eee6; color: var(--ink); }
+      .olho:focus-visible { outline: 3px solid var(--primary); outline-offset: 0; }
+      .olho svg { width: 22px; height: 22px; }
+      .olho .fechado { display: none; }
+      .olho[aria-pressed="true"] .aberto { display: none; }
+      .olho[aria-pressed="true"] .fechado { display: block; }
+
+      /* força da senha */
+      .forca { margin: -2px 0 16px; }
+      .barras { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+      .barras i {
+        height: 5px;
+        border-radius: 3px;
+        background: var(--hairline);
+        transition: background 0.2s;
+      }
+      .forca[data-n="1"] .barras i:nth-child(-n + 1) { background: var(--alarm); }
+      .forca[data-n="2"] .barras i:nth-child(-n + 2) { background: #e8a317; }
+      .forca[data-n="3"] .barras i:nth-child(-n + 3) { background: var(--positive); }
+      .forca[data-n="4"] .barras i:nth-child(-n + 4) { background: var(--positive); }
+      .forca .nivel {
+        display: block;
+        margin-top: 6px;
+        min-height: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      /* requisitos */
+      .requisitos { list-style: none; margin: 0 0 22px; padding: 0; }
+      .requisitos li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        padding: 3px 0;
+        transition: color 0.15s;
+      }
+      .requisitos .ponto {
+        flex: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1.5px solid #cfcabd;
+        display: grid;
+        place-items: center;
+        transition: background 0.15s, border-color 0.15s;
+      }
+      .requisitos .ponto svg { width: 12px; height: 12px; opacity: 0; color: #fff; transition: opacity 0.15s; }
+      .requisitos li.ok { color: var(--ink); }
+      .requisitos li.ok .ponto { background: var(--positive); border-color: var(--positive); }
+      .requisitos li.ok .ponto svg { opacity: 1; }
+
+      /* botão */
+      .principal {
         width: 100%;
-        min-height: 54px;
+        min-height: 56px;
         font-family: var(--sans);
         font-size: 16px;
         font-weight: 800;
@@ -133,15 +269,18 @@
         border: 0;
         border-radius: 16px;
         cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
       }
-      button:disabled { opacity: 0.4; cursor: default; }
-      button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+      .principal:hover:not(:disabled) { background: var(--primary-deep); }
+      .principal:active:not(:disabled) { transform: translateY(1px); }
+      .principal:disabled { opacity: 0.45; cursor: default; }
+      .principal:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
       .aviso {
         margin: 0 0 18px;
         padding: 13px 15px;
-        border-radius: 16px;
-        border-left: 3px solid var(--alarm);
+        border-radius: 14px;
+        border-left: 4px solid var(--alarm);
         background: #fdece7;
         color: var(--ink);
         font-size: 14.5px;
@@ -149,53 +288,154 @@
       .aviso.ok { border-left-color: var(--positive); background: #eef7e9; }
 
       .dica { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+      .rodape { margin: 26px 0 0; font-size: 12.5px; color: var(--muted); }
       [hidden] { display: none !important; }
+
+      /* ---------- telas largas: painel ao lado ---------- */
+      @media (min-width: 880px) {
+        body {
+          grid-template-columns: minmax(380px, 5fr) minmax(0, 6fr);
+          grid-template-rows: 1fr;
+        }
+        .marca {
+          padding: 48px 56px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .marca h2 { font-size: 46px; margin-top: 44px; }
+        .marca .frase { display: block; }
+        .marca .topo { display: block; }
+        .rota { display: block; margin-top: 0; }
+        .conteudo { align-items: center; padding: 48px 56px; }
+        .miolo { max-width: 420px; }
+        h1 { font-size: 32px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
+      }
     </style>
   </head>
   <body>
-    <main>
-      <span class="mark">VemVan</span>
-
-      <!-- Estado 1: o link trouxe uma sessão válida. -->
-      <section id="formulario" hidden>
-        <h1>Escolha uma nova senha</h1>
-        <p>Ela precisa ter pelo menos 8 caracteres.</p>
-
-        <div id="erro" class="aviso" hidden></div>
-
-        <form id="troca">
-          <label for="senha">Nova senha</label>
-          <input id="senha" type="password" autocomplete="new-password" minlength="8" required />
-
-          <label for="repetida">Repita a nova senha</label>
-          <input id="repetida" type="password" autocomplete="new-password" minlength="8" required />
-
-          <button id="salvar" type="submit">Salvar nova senha</button>
-        </form>
-      </section>
-
-      <!-- Estado 2: deu certo. -->
-      <section id="pronto" hidden>
-        <h1>Senha alterada</h1>
-        <div class="aviso ok">
-          Pronto. Abra o VemVan no celular e entre com a senha nova.
-        </div>
-        <p class="dica">Pode fechar esta página.</p>
-      </section>
-
-      <!-- Estado 3: o link não serve mais. -->
-      <section id="invalido" hidden>
-        <h1>Este link não vale mais</h1>
-        <p id="motivo">
-          Links de redefinição valem uma vez só e expiram. Peça outro pela tela de
-          entrada do aplicativo, em “Esqueci minha senha”.
+    <aside class="marca">
+      <div class="topo">
+        <span class="logo">VemVan</span>
+        <h2>Nova senha, <em>mesma&nbsp;rota.</em></h2>
+        <p class="frase">
+          Escolha uma senha nova e volte para o app. Seus alunos, seus trajetos
+          e o seu histórico continuam exatamente onde estavam.
         </p>
-        <p class="dica">
-          Se você já tinha clicado neste link antes, ele foi consumido no primeiro
-          clique — mesmo que nada tenha aparecido na tela.
-        </p>
-      </section>
-    </main>
+      </div>
+
+      <svg class="rota" viewBox="0 0 400 150" fill="none" aria-hidden="true">
+        <path
+          d="M14 120 C 90 120, 90 40, 170 44 S 270 118, 330 70 S 372 30, 386 30"
+          stroke="rgba(255,255,255,0.45)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-dasharray="1 10"
+        />
+        <circle cx="14" cy="120" r="9" fill="#cfff47" />
+        <circle cx="170" cy="44" r="7" fill="#ffffff" />
+        <circle cx="330" cy="70" r="7" fill="#ffffff" />
+        <circle cx="386" cy="30" r="9" fill="#ff5a3d" />
+      </svg>
+    </aside>
+
+    <div class="conteudo">
+      <main class="miolo">
+        <!-- Estado 1: o link trouxe uma sessão válida. -->
+        <section id="formulario" hidden>
+          <div class="selo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10.5" width="16" height="10" rx="2.5" />
+              <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+              <circle cx="12" cy="15.5" r="1" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <h1>Escolha uma nova senha</h1>
+          <p>É com ela que você vai entrar no VemVan daqui para frente.</p>
+
+          <div id="erro" class="aviso" role="alert" hidden></div>
+
+          <form id="troca" novalidate>
+            <div class="campo">
+              <label for="senha">Nova senha</label>
+              <input id="senha" type="password" autocomplete="new-password" minlength="8" required />
+              <button class="olho" type="button" aria-pressed="false" aria-label="Mostrar as senhas" data-olho>
+                <svg class="aberto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                <svg class="fechado" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6A16.6 16.6 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 4.4-1" />
+                  <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                </svg>
+              </button>
+            </div>
+
+            <div class="forca" id="forca" data-n="0" aria-live="polite">
+              <div class="barras"><i></i><i></i><i></i><i></i></div>
+              <span class="nivel" id="nivel"></span>
+            </div>
+
+            <div class="campo">
+              <label for="repetida">Repita a nova senha</label>
+              <input id="repetida" type="password" autocomplete="new-password" minlength="8" required />
+            </div>
+
+            <ul class="requisitos" aria-label="Requisitos da senha">
+              <li id="req-tamanho">
+                <span class="ponto"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.3 5 8.7l4.5-5.4" /></svg></span>
+                Pelo menos 8 caracteres
+              </li>
+              <li id="req-igual">
+                <span class="ponto"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.3 5 8.7l4.5-5.4" /></svg></span>
+                As duas senhas são iguais
+              </li>
+            </ul>
+
+            <button id="salvar" class="principal" type="submit">Salvar nova senha</button>
+          </form>
+
+          <p class="rodape">Este link vale uma vez só. Depois de salvar, ele deixa de funcionar.</p>
+        </section>
+
+        <!-- Estado 2: deu certo. -->
+        <section id="pronto" hidden>
+          <div class="selo ok" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.5 10 17.5 19 7" />
+            </svg>
+          </div>
+          <h1>Senha alterada</h1>
+          <div class="aviso ok">
+            Pronto. Abra o VemVan no celular e entre com a senha nova.
+          </div>
+          <p class="dica">Pode fechar esta página.</p>
+        </section>
+
+        <!-- Estado 3: o link não serve mais. -->
+        <section id="invalido" hidden>
+          <div class="selo ruim" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </div>
+          <h1>Este link não vale mais</h1>
+          <p id="motivo">
+            Links de redefinição valem uma vez só e expiram. Peça outro pela tela de
+            entrada do aplicativo, em “Esqueci minha senha”.
+          </p>
+          <p class="dica">
+            Se você já tinha clicado neste link antes, ele foi consumido no primeiro
+            clique — mesmo que nada tenha aparecido na tela.
+          </p>
+        </section>
+      </main>
+    </div>
 
     <script>
       (function () {
@@ -209,6 +449,13 @@
         var motivo = document.getElementById("motivo");
         var erro = document.getElementById("erro");
         var salvar = document.getElementById("salvar");
+        var campoSenha = document.getElementById("senha");
+        var campoRepetida = document.getElementById("repetida");
+        var forca = document.getElementById("forca");
+        var nivel = document.getElementById("nivel");
+        var reqTamanho = document.getElementById("req-tamanho");
+        var reqIgual = document.getElementById("req-igual");
+        var olho = document.querySelector("[data-olho]");
 
         function mostrar(secao) {
           [formulario, pronto, invalido].forEach(function (s) {
@@ -220,6 +467,38 @@
           erro.textContent = texto;
           erro.hidden = false;
         }
+
+        // Orientação visual, nunca bloqueio: o servidor é quem aceita ou recusa.
+        var NIVEIS = ["", "Fraca", "Razoável", "Boa", "Forte"];
+        function pontuar(senha) {
+          if (!senha) return 0;
+          var n = 0;
+          if (senha.length >= MINIMO) n++;
+          if (senha.length >= 12) n++;
+          if (/[a-z]/.test(senha) && /[A-Z]/.test(senha) && /\d/.test(senha)) n++;
+          if (/[^A-Za-z0-9]/.test(senha) && senha.length >= MINIMO) n++;
+          return Math.max(1, n);
+        }
+
+        function atualizar() {
+          var senha = campoSenha.value;
+          var repetida = campoRepetida.value;
+          var n = pontuar(senha);
+          forca.setAttribute("data-n", String(n));
+          nivel.textContent = senha ? "Senha " + NIVEIS[n].toLowerCase() : "";
+          reqTamanho.classList.toggle("ok", senha.length >= MINIMO);
+          reqIgual.classList.toggle("ok", senha.length > 0 && senha === repetida);
+        }
+
+        campoSenha.addEventListener("input", atualizar);
+        campoRepetida.addEventListener("input", atualizar);
+
+        olho.addEventListener("click", function () {
+          var vai = olho.getAttribute("aria-pressed") !== "true";
+          olho.setAttribute("aria-pressed", String(vai));
+          olho.setAttribute("aria-label", vai ? "Esconder as senhas" : "Mostrar as senhas");
+          campoSenha.type = campoRepetida.type = vai ? "text" : "password";
+        });
 
         // O Supabase devolve tudo no fragmento: `#access_token=…&type=recovery`
         // quando deu certo, `#error=…&error_code=…` quando o token já foi usado.
@@ -243,8 +522,8 @@
           evento.preventDefault();
           erro.hidden = true;
 
-          var senha = document.getElementById("senha").value;
-          var repetida = document.getElementById("repetida").value;
+          var senha = campoSenha.value;
+          var repetida = campoRepetida.value;
 
           if (senha.length < MINIMO) {
             reclamar("A senha precisa ter pelo menos " + MINIMO + " caracteres.");
